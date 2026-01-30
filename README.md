@@ -36,17 +36,17 @@ graph TD
     ARS[("ARS Simulator\n(Use CLI)")]
 
     subgraph "은행 및 인증망 (Bank & Auth)"
-        BankWeb[은행 웹 (Port: 5175)]
-        BankWAS[은행 백엔드 (Port: 8085)]
-        AuthWAS[SSAP 인증 (Port: 8086)]
-        DB1[(Bank DB)]
-        DB2[(Auth DB)]
+        BankWeb["은행 웹 (Port: 5175)"]
+        BankWAS["은행 백엔드 (Port: 8085)"]
+        AuthWAS["SSAP 인증 (Port: 8086)"]
+        DB1[("Bank DB")]
+        DB2[("Auth DB")]
     end
 
     subgraph "콜센터망 (Call Center)"
-        CallWeb[상담원 웹 (Port: 5178)]
-        CallWAS[콜센터 백엔드 (Port: 8082)]
-        Security[보안 게이트웨이]
+        CallWeb["상담원 웹 (Port: 5178)"]
+        CallWAS["콜센터 백엔드 (Port: 8082)"]
+        Security["보안 게이트웨이"]
     end
 
     User --> BankWeb
