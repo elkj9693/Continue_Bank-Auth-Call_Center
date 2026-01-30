@@ -1,29 +1,30 @@
-# Continue Bank - 금융 보안 플랫폼
+# Continue Bank - 금융 보안 & AI 콜센터 플랫폼
 > "금융의 중단 없는 흐름을 기술로 지킵니다."
 
-Continue Bank는 SSAP 본인인증 시스템을 활용한 금융 서비스 플랫폼입니다. 위탁사(Continue Bank), 수탁사(SSAP 본인인증), TM 센터(콜센터) 간의 안전한 개인정보 처리 및 금융 컴플라이언스를 구현합니다.
+Continue Bank는 **SSAP 본인인증 시스템**과 **지능형 콜센터(TM Center)**를 통합한 차세대 금융 서비스 플랫폼입니다.
+위탁사(Continue Bank), 수탁사(SSAP 본인인증), 그리고 상담 수탁사(콜센터) 간의 안전한 데이터 흐름과 금융 컴플라이언스를 완벽하게 구현했습니다.
 
 ---
 
 ## 📋 목차
-- [프로젝트 개요](#🎯-프로젝트-개요)
-- [시스템 아키텍처](#🏗-시스템-아키텍처)
-- [주요 기능](#✨-주요-기능)
-- [기술 스택](#🛠-기술-스택)
-- [프로젝트 구조](#📁-프로젝트-구조)
-- [시작하기](#🚀-시작하기)
-- [서비스별 상세 문서](#📚-서비스별-상세-문서)
+- [프로젝트 개요](#-프로젝트-개요)
+- [시스템 아키텍처](#-시스템-아키텍처)
+- [주요 기능](#-주요-기능)
+- [기술 스택](#-기술-스택)
+- [프로젝트 구조](#-프로젝트-구조)
+- [시작하기](#-시작하기)
+- [서비스별 상세 문서](#-서비스별-상세-문서)
 
 ---
 
 ## 🎯 프로젝트 개요
-Continue Bank는 금융 보안 컴플라이언스를 준수하 현대적인 디지털 뱅킹 플랫폼입니다.
+이 프로젝트는 실제 금융권 환경을 모사하여 **보안(Security)**, **인증(Identity)**, **상담(CS)** 프로세스를 유기적으로 연결했습니다.
 
 ### 핵심 가치
-- **보안 우선**: 모든 개인정보는 AES-256 암호화로 보호
-- **컴플라이언스**: 금융 규정 준수 (9개 필수 약관 + 4개 선택 약관)
-- **투명성**: 사용자에게 명확한 데이터 처리 고지
-- **신뢰**: SSAP 본인인증을 통한 안전한 신원 확인
+- **토스(Toss) 스타일 UX**: 직관적이고 미려한 금융 사용자 경험 제공
+- **3-Tier 보안 아키텍처**: 콜센터-은행-인증기관 간 철저한 데이터 분리 (ARS 비밀번호 평문 저장 방지)
+- **ARS 시뮬레이션**: 실제 전화망을 모사한 CLI 기반 ARS 분실 신고 시스템
+- **통합 컴플라이언스**: 9개 필수 약관 자동화 및 전자서명(CI/DI) 시뮬레이션
 
 ---
 
@@ -31,166 +32,134 @@ Continue Bank는 금융 보안 컴플라이언스를 준수하 현대적인 디�
 
 ```mermaid
 graph TD
-    subgraph "데이터베이스 (MySQL 인스턴스)"
-        DB1[(위탁사 DB<br/>포트: 3306)]
-        DB2[(수탁사 DB<br/>포트: 3307)]
-        DB3[(콜센터 DB<br/>포트: 3308)]
+    User((사용자))
+    ARS[("ARS Simulator\n(Use CLI)")]
+
+    subgraph "은행 및 인증망 (Bank & Auth)"
+        BankWeb[은행 웹 (Port: 5175)]
+        BankWAS[은행 백엔드 (Port: 8085)]
+        AuthWAS[SSAP 인증 (Port: 8086)]
+        DB1[(Bank DB)]
+        DB2[(Auth DB)]
     end
 
-    subgraph "백엔드 서비스"
-        SVC1[은행 위탁사 WAS<br/>포트: 8085]
-        SVC2[인증 수탁사/SSAP<br/>포트: 8086]
-        SVC3[상담 수탁사/콜센터<br/>포트: 8082]
+    subgraph "콜센터망 (Call Center)"
+        CallWeb[상담원 웹 (Port: 5178)]
+        CallWAS[콜센터 백엔드 (Port: 8082)]
+        Security[보안 게이트웨이]
     end
 
-    SVC1 --> DB1
-    SVC2 --> DB2
-    SVC3 --> DB3
+    User --> BankWeb
+    User -->|전화 연결| ARS
+    ARS -->|암호화 전송| CallWAS
+    CallWAS -->|PIN 검증 요청| BankWAS
+    BankWeb -->|인증 요청| AuthWAS
+    BankWAS --> DB1
+    AuthWAS --> DB2
+    CallWAS -->|상담 이력| BankWAS
 ```
-
-### 데이터 흐름
-1. **[위탁사]** 약관 동의 및 정보 입력
-2. **[위탁사→수탁사]** SSAP 본인인증 요청 (인증 토큰 생성)
-3. **[수탁사]** OTP 발송 및 검증 (휘발성 세션 DB 사용)
-4. **[위탁사]** 회원가입 완료 (CI 기반 중복 체크 및 암호화 저장)
 
 ---
 
 ## ✨ 주요 기능
 
 ### 1. 위탁사 (Continue Bank)
-#### 사용자 인증
-- 회원가입 / 로그인
-- 아이디 찾기 / 비밀번호 재설정
-- SSAP 본인인증 연동
-
-#### 금융 서비스
-- 계좌 개설
-- 대시보드
-- 거래 내역 조회
-
-#### 컴플라이언스
-- 9개 필수 약관 + 4개 선택 약관 관리
-- 동의 내역 조회 및 철회
-- 본인인증 기록 관리
-- 개인정보 처리 요청 (잊혀질 권리)
+- **뱅킹 서비스**: 계좌 개설, 카드 발급, 거래 내역 조회
+- **아웃바운드 Lead 생성**: 마케팅 동의 고객을 대상으로 상담 리드 자동 생성
+- **보안 설정**: RSA 키 교환 및 본인확인검증 서비스 연동
 
 ### 2. 수탁사 (SSAP 본인인증)
-#### 본인인증
-- 휴대폰 번호 기반 OTP 인증
-- 연계정보(CI) 및 중복가입확인정보(DI) 생성
-- 인증 토큰(JWT 스타일) 발급 및 검증
+- **모의 인증 시스템**: 통신사 가입자 DB 시뮬레이션
+- **규제 준수**: CI(연계정보) 및 DI(중복가입확인정보) 생성 알고리즘 구현
+- **OTP 검증**: 3분 TTL(Time-To-Live)을 가진 휘발성 보안 세션
 
-#### 보안 및 인프라
-- AES-256 암호화 (성명, 휴대폰번호)
-- TTL 기반 인증 데이터 자동 파기 (3분)
-- 접속 IP 및 감사 로그 기록
-
-#### 데이터 시뮬레이션
-- 가상 통신사 가입자 데이터베이스 운영
+### 3. 상담 수탁사 (Call Center & ARS)
+- **ARS 카드 분실 신고**: 
+    - CLI 기반 시뮬레이터 (`run-ars.bat`) 제공
+    - **ANI(발신자 식별)** 및 **E2E 암호화(OAEP)** 적용
+    - 이미 분실된 카드 중복 신고 방지 로직
+- **아웃바운드 상담 시스템**:
+    - 은행에서 전달받은 Lead 기반 상담 진행
+    - 상담 결과(성공/거절 등) 실시간 은행 DB 동기화
+- **Audit Log**: 모든 상담 및 ARS 접근 이력 감사 로그 기록
 
 ---
 
 ## 🛠 기술 스택
 
-### 백엔드 (Backend)
-- **프레임워크**: Spring Boot 3.x
-- **언어**: Java 21
-- **데이터베이스**: MySQL 8.0
-- **보안**: Spring Security, JWT, AES-256
-- **객체 맵핑**: JPA / Hibernate
+### Backend
+- **Core**: Java 21, Spring Boot 3.3
+- **Database**: MySQL 8.0, JPA/Hibernate
+- **Security**: Spring Security, RSA/AES-256 Encryption, JWT
 
-### 프론트엔드 (Frontend)
-- **프레임워크**: React 18
-- **빌드 도구**: Vite
-- **라우팅**: React Router v6
-- **스타일링**: Vanilla CSS, Tailwind CSS
-- **아이콘**: Lucide React
+### Frontend
+- **Framework**: React 18, Vite
+- **UI/UX**: Toss-style Design System (Custom CSS), Lucide Icons
+- **State**: Context API
+
+### Infrastructure & Tools
+- **Build**: Gradle (CallCenter), Maven (Bank/Auth)
+- **Deployment**: Docker Compose
+- **Simulation**: Java CLI (ARS Simulator)
 
 ---
 
 ## 📁 프로젝트 구조
 
 ```text
-homepage-project/
-├── entrusting-client/    # 위탁사 시스템 (Continue Bank)
-├── trustee-provider/     # 수탁사 시스템 (SSAP 본인인증)
-├── docs/                 # 기술 문서 (배포 가이드, 설계서 등)
-├── infra/                # 인프라 설정 (Nginx, K8s, 보안 설정)
-├── database/             # 데이터베이스 초기화 스크립트
-├── start-all.bat         # 전체 서비스 통합 실행 파일
-└── docker-compose.yml    # 개발 환경용 데이터베이스 구성
+root/
+├── entrusting-client/    # [은행] Continue Bank (Back/Front)
+├── trustee-provider/     # [인증] SSAP Authentication (Back/Front)
+├── trustee-callcenter/   # [콜센터] TM Center & ARS (Back/Front)
+├── docs/                 # 기술 문서 (DB 스키마, 아키텍처 등)
+├── infra/                # 인프라 설정 (Nginx, Keys)
+├── start-all.bat         # 원클릭 전체 실행 스크립트
+├── run-ars.bat           # ARS 시뮬레이터 실행 스크립트
+└── docker-compose.yml    # 데이터베이스(3-Node) 구성
 ```
 
 ---
 
 ## 🚀 시작하기
 
-### 사전 요구사항
-- Java 21 이상
-- Node.js 18 이상
-- MySQL 8.0 이상
-
-### 1. 데이터베이스 초기화
-```bash
-# MySQL 접속 (3306 포트)
-mysql -u root -p
-
-# 초기화 스크립트 실행
-source init.sql
+### 1. 데이터베이스 준비
+```batch
+start-all.bat
+# 실행 시 자동으로 Docker DB 컨테이너가 구동됩니다.
 ```
+*(수동 실행: `docker-compose up -d`)*
 
-### 2. 백엔드 실행
-```bash
-# 위탁사 백엔드 기동
-cd entrusting-client/backend
-./mvnw spring-boot:run
+### 2. 서비스 접속 정보
+| 서비스 | URL / Command | 역할 |
+|--------|---------------|------|
+| **은행 (고객용)** | http://localhost:5175 | 회원가입, 카드조회 |
+| **인증 (팝업용)** | http://localhost:5176 | 본인인증 시뮬레이션 |
+| **콜센터 (상담원)** | http://localhost:5178 | 아웃바운드 업무 |
+| **은행 백엔드** | http://localhost:8085 | 메인 API 서버 |
+| **콜센터 백엔드** | http://localhost:8082 | ARS 및 상담 API |
 
-# SSAP 백엔드 기동
-cd trustee-provider/backend
-./mvnw spring-boot:run
+### 3. ARS 시뮬레이션 실행 (New!)
+서버가 모두 켜진 상태에서 별도 터미널(CMD)을 열고 실행하세요.
+```batch
+run-ars.bat
 ```
-
-### 3. 프론트엔드 실행
-```bash
-# 위탁사 프론트엔드 (포트 5175)
-cd entrusting-client/frontend
-npm install
-npm run dev
-
-# SSAP 프론트엔드 (포트 5176)
-cd trustee-provider/frontend
-npm install
-npm run dev
-```
+- **테스트 번호**: `010-9999-1111` (ARS테스터1)
+- **비밀번호**: `1234`
 
 ---
 
 ## 📚 서비스별 상세 문서
-*   [위탁사 (Continue Bank) 기술 문서](./entrusting-client/README.md)
-*   [수탁사 (SSAP 인증) 기술 문서](./trustee-provider/README.md)
-*   [시스템 포트 명세 가이드](../system_port_specification.md)
-*   [데이터베이스 설계 상세](../docs/DB_SCHEMA.md)
-*   [개인정보 처리 흐름도](../docs/PRIVACY_FLOW_2026.md)
-
----
-
-## 🔐 보안 정책 및 규준 준수
-
-### 개인정보 보호
-- **암호화**: 모든 개인정보는 AES-256-CBC 알고리즘으로 암호화됩니다.
-- **키 관리**: 보안을 위해 암호화 키는 환경 변수를 통해 물리적으로 분리하여 관리합니다.
-
-### 데이터 생애 주기
-- **휘발성 데이터**: 본인인증용 세션 데이터는 3분 후 자동 파기(TTL)됩니다.
-- **영구 데이터**: 고객의 약관 동의 이력 및 금융 기록은 법적 보존 기간 동안 안전하게 보관됩니다.
+*   [📂 위탁사 (Bank) 상세 가이드](./entrusting-client/README.md)
+*   [📂 수탁사 (Auth) 상세 가이드](./trustee-provider/README.md)
+*   [📂 콜센터 (CallCenter) 상세 가이드](./trustee-callcenter/README.md)
+*   [🗄️ 데이터베이스 스키마 (DB Schema)](./docs/DB_SCHEMA.md)
+*   [🔑 테스트 계정 목록 (Test Accounts)](./TEST_ACCOUNTS.md)
 
 ---
 
 ## 📄 라이선스 및 기여
-- 본 프로젝트는 Continue Bank 개발팀에 의해 제작되었습니다.
-- UI/UX 디자인은 토스(Toss) 스타일의 심플하고 직관적인 디자인을 참고했습니다.
+- **Copyright**: 2026 Continue Bank Security Team.
+- **Design**: Toss Design Principles (Reference)
 
 ---
 **Continue Bank** - 기술로 금융의 신뢰를 만듭니다. 🏦
-
