@@ -1,8 +1,4 @@
-# Continue Bank - 금융 보안 & AI 콜센터 플랫폼
-> "금융의 중단 없는 흐름을 기술로 지킵니다."
-
-Continue Bank는 **SSAP 본인인증 시스템**과 **지능형 콜센터(TM Center)**를 통합한 차세대 금융 서비스 플랫폼입니다.
-위탁사(Continue Bank), 수탁사(SSAP 본인인증), 그리고 상담 수탁사(콜센터) 간의 안전한 데이터 흐름과 금융 컴플라이언스를 완벽하게 구현했습니다.
+# Continue Bank
 
 ---
 
@@ -25,39 +21,6 @@ Continue Bank는 **SSAP 본인인증 시스템**과 **지능형 콜센터(TM Cen
 - **3-Tier 보안 아키텍처**: 콜센터-은행-인증기관 간 철저한 데이터 분리 (ARS 비밀번호 평문 저장 방지)
 - **ARS 시뮬레이션**: 실제 전화망을 모사한 CLI 기반 ARS 분실 신고 시스템
 - **통합 컴플라이언스**: 9개 필수 약관 자동화 및 전자서명(CI/DI) 시뮬레이션
-
----
-
-## 🏗 시스템 아키텍처
-
-```mermaid
-graph TD
-    User((사용자))
-    ARS[("ARS Simulator\n(Use CLI)")]
-
-    subgraph "은행 및 인증망 (Bank & Auth)"
-        BankWeb["은행 웹 (Port: 5175)"]
-        BankWAS["은행 백엔드 (Port: 8085)"]
-        AuthWAS["SSAP 인증 (Port: 8086)"]
-        DB1[("Bank DB")]
-        DB2[("Auth DB")]
-    end
-
-    subgraph "콜센터망 (Call Center)"
-        CallWeb["상담원 웹 (Port: 5178)"]
-        CallWAS["콜센터 백엔드 (Port: 8082)"]
-        Security["보안 게이트웨이"]
-    end
-
-    User --> BankWeb
-    User -->|전화 연결| ARS
-    ARS -->|암호화 전송| CallWAS
-    CallWAS -->|PIN 검증 요청| BankWAS
-    BankWeb -->|인증 요청| AuthWAS
-    BankWAS --> DB1
-    AuthWAS --> DB2
-    CallWAS -->|상담 이력| BankWAS
-```
 
 ---
 
