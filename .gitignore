@@ -1,0 +1,30 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Java / Maven / Gradle
+target/
+build/
+.gradle/
+gradle/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+*.class
+*.log
+*.jar
+*.war
+
+# Node / Frontend
+node_modules/
+dist/
+coverage/
+.env
+.env.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+Thumbs.db

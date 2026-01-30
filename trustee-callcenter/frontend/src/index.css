@@ -1,0 +1,321 @@
+:root {
+  /* Toss-like Color Palette */
+  --primary: #3182f6;
+  --primary-bg: rgba(49, 130, 246, 0.08);
+  --primary-hover: #1b64da;
+
+  --bg-app: #f2f4f6;
+  /* Light Gray Background */
+  --bg-card: #ffffff;
+  /* Pure White Cards */
+
+  --text-main: #191f28;
+  /* Deep Black */
+  --text-dim: #4e5968;
+  /* Muted Gray */
+  --text-white: #ffffff;
+
+  --border: #e5e8eb;
+  /* Very subtle border */
+
+  --success: #00d082;
+  --danger: #f04452;
+  --warning: #ffbb00;
+
+  /* Radii - Toss uses large radii */
+  --radius-xl: 28px;
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --radius-sm: 8px;
+
+  /* Shadows - Soft and expensive looking */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.08);
+
+  --header-height: 60px;
+  --sidebar-width: 260px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Pretendard', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  line-height: 1.5;
+  height: 100vh;
+  overflow: hidden;
+  /* Prevent body scroll, handle in content */
+}
+
+/* Layout Engine */
+.app-layout {
+  display: flex;
+  height: 100vh;
+  background: var(--bg-app);
+  padding: 0;
+  /* Full screen split */
+}
+
+/* Sidebar - Fixed on Left */
+.sidebar {
+  width: var(--sidebar-width);
+  height: 100%;
+  background: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  /* Subtle divider */
+  padding: 24px;
+  flex-shrink: 0;
+  /* Prevent shrinking */
+  z-index: 10;
+}
+
+.sidebar-header {
+  margin-bottom: 32px;
+  padding: 0 12px;
+}
+
+.brand-title {
+  font-size: 20px;
+  font-weight: 800;
+  /* Extra Bold */
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  letter-spacing: -0.5px;
+}
+
+.nav-menu {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  color: var(--text-dim);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.nav-item:hover {
+  background: #f9fafb;
+  color: var(--text-main);
+}
+
+.nav-item.active {
+  background: var(--primary-bg);
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 24px;
+}
+
+.agent-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: var(--radius-md);
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  background: var(--primary);
+  color: white;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--success);
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(0, 208, 130, 0.15);
+}
+
+/* Main Container */
+.main-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  /* Prevent flex overflow */
+  height: 100vh;
+}
+
+.top-bar {
+  height: var(--header-height);
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-app);
+  /* Transparent-like */
+  flex-shrink: 0;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.content-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 32px 32px 32px;
+  /* Content Padding */
+}
+
+/* Common Components */
+.toss-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  /* Slight border for definition */
+}
+
+.toss-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-toss {
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-toss-primary {
+  background: var(--primary);
+  color: white;
+  padding: 14px 24px;
+}
+
+.btn-toss-primary:hover {
+  background: var(--primary-hover);
+}
+
+.btn-toss-secondary {
+  background: white;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  padding: 10px 16px;
+}
+
+.btn-toss-secondary:hover {
+  background: #f9fafb;
+  color: var(--text-main);
+}
+
+/* Input Fields */
+.input {
+  width: 100%;
+  padding: 16px 20px;
+  background: #f9fafb;
+  border: 1px solid transparent;
+  /* No border initially */
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  color: var(--text-main);
+  transition: all 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  background: white;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-bg);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-up {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.pulse-animation {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(49, 130, 246, 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 15px rgba(49, 130, 246, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(49, 130, 246, 0);
+  }
+}
+
+/* Scrollbar Customization */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d6db;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b0b8c1;
+}

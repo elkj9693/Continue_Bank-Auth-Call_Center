@@ -1,0 +1,4 @@
+/* Clear App.css to use index.css exclusively for clean design */
+.app-container {
+  /* No-op, styling moved to layout classes in App.jsx */
+}
