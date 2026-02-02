@@ -20,6 +20,8 @@ import java.util.Map;
 public class CallCenterArsController {
 
     private final IssuerClient issuerClient;
+    private final com.callcenter.callcenterwas.domain.consultation.service.ConsultationService consultationService;
+    private final com.callcenter.callcenterwas.domain.log.service.LogService logService;
 
     /**
      * Identify Customer by Phone (ANI Detection)
@@ -28,7 +30,16 @@ public class CallCenterArsController {
     public Map<String, Object> identifyCustomer(@RequestBody Map<String, String> request) {
         String phoneNumber = request.get("phoneNumber");
         log.info("[ARS] Identifying customer with ANI: {}", phoneNumber);
-        return issuerClient.identifyCustomer(phoneNumber);
+
+        // API 호출 및 로그 기록 (은행은 'found' 키를 사용함)
+        Map<String, Object> result = issuerClient.identifyCustomer(phoneNumber);
+        boolean found = Boolean.TRUE.equals(result.get("found"));
+
+        logService.logIntegration("N/A", "/api/v1/ars/identify", "POST",
+                found ? 200 : 404,
+                "Customer Identification Result: " + found);
+
+        return result;
     }
 
     /**
@@ -40,6 +51,10 @@ public class CallCenterArsController {
         String pin = request.get("pin");
 
         log.info("[ARS] Verifying PIN for customerRef: {} using 3-Tier Security", customerRef);
+
+        // 1. 상담 케이스 생성 (ARS - LOSS_REPORT)
+        com.callcenter.callcenterwas.domain.consultation.entity.ConsultationCase consultationCase = consultationService
+                .createCase("ARS", "LOSS_REPORT", customerRef, "SYSTEM");
 
         try {
             // STEP 1: Get Public Key from Bank (Issuer)
@@ -58,14 +73,48 @@ public class CallCenterArsController {
 
             // STEP 4: Send Encrypted PIN to Bank for Verification
             Map<String, Object> result = issuerClient.verifyPin(customerRef, kid, ciphertext);
+            boolean success = (boolean) result.get("success");
+
+            // 2. 인증 로그 기록
+            logService.logArsAuth(consultationCase.getId(), customerRef, "ARS_PIN",
+                    success ? "SUCCESS" : "FAIL", success ? "" : (String) result.get("message"), 0);
+
+            // 3. 연동 로그 기록
+            logService.logIntegration(kid, "/api/v1/ars/verify-pin", "POST",
+                    success ? 200 : 401, "PIN Verification " + success);
 
             log.info("[ARS] PIN Verification Result: {}", result.get("status"));
-            return result;
+
+            // 4. 본인 확인 실패 시 케이스 종료
+            if (!success) {
+                consultationService.closeCase(consultationCase.getId(), "본인 확인 실패 (비밀번호 불일치)");
+            }
+
+            // 결과에 Case ID 포함 (추후 정지 시 사용)
+            Map<String, Object> response = new java.util.HashMap<>(result);
+            response.put("caseId", consultationCase.getId());
+            return response;
 
         } catch (Exception e) {
             log.error("[ARS] PIN Encryption or Verification Error", e);
+            logService.logArsAuth(consultationCase.getId(), customerRef, "ARS_PIN", "ERROR", e.getMessage(), 1);
+            consultationService.closeCase(consultationCase.getId(), "시스템 에러: " + e.getMessage());
             return Map.of("success", false, "status", "ERROR", "message", e.getMessage());
         }
+    }
+
+    /**
+     * Explicitly close a consultation case (for early hangup or cancellation)
+     */
+    @PostMapping("/close-case")
+    public Map<String, Object> closeCase(@RequestBody Map<String, String> request) {
+        Long caseId = Long.valueOf(request.get("caseId"));
+        String note = request.getOrDefault("note", "상담 종료");
+
+        log.info("[ARS] Explicitly closing case: {}, Note: {}", caseId, note);
+        consultationService.closeCase(caseId, note);
+
+        return Map.of("success", true);
     }
 
     /**
@@ -74,16 +123,31 @@ public class CallCenterArsController {
     @PostMapping("/report-loss")
     public Map<String, Object> reportLoss(@RequestBody Map<String, Object> request) {
         String customerRef = (String) request.get("customerRef");
+        Long caseId = Long.valueOf(request.get("caseId").toString());
         @SuppressWarnings("unchecked")
         List<String> selectedCardRefs = (List<String>) request.get("selectedCardRefs");
 
-        log.info("[ARS] Reporting loss for customerRef: {}, cardRefs: {}", customerRef, selectedCardRefs);
+        log.info("[ARS] Reporting loss for customerRef: {}, cardRefs: {}, caseId: {}", customerRef, selectedCardRefs,
+                caseId);
 
+        // API 호출
         Map<String, Object> result = issuerClient.reportCardLoss(customerRef, selectedCardRefs);
+        boolean success = Boolean.TRUE.equals(result.get("success"));
 
-        // Audit Logging
-        issuerClient.sendAuditEvent("CARD_LOSS_REPORT", (boolean) result.get("success") ? "SUCCESS" : "FAIL",
-                "ARS_SYSTEM", "Card loss reported via ARS");
+        // 1. 연동 로그 기록
+        logService.logIntegration("N/A", "/api/v1/ars/report-loss", "POST",
+                success ? 200 : 500, "Card Loss Report " + success);
+
+        // 2. 감시 로그 기록
+        logService.logAudit("SYSTEM", "CARD_LOSS_REPORT", caseId.toString(), "CASE",
+                "Reported loss for ids: " + selectedCardRefs);
+
+        // 3. 케이스 종료 (상세 결과 메시지 포함)
+        if (success) {
+            consultationService.closeCase(caseId, "분실 신고 완료 (" + selectedCardRefs.size() + "건)");
+        } else {
+            consultationService.closeCase(caseId, "분실 신고 실패: " + result.get("message"));
+        }
 
         return result;
     }

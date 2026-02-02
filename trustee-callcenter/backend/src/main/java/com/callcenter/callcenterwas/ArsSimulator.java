@@ -17,7 +17,8 @@ import java.util.regex.Pattern;
  */
 public class ArsSimulator {
 
-    private static final String BASE_URL = "http://localhost:8082/callcenter/ars";
+    private static final String BASE_URL = System.getProperty("ars.api.base-url",
+            "http://localhost:8082/callcenter/ars");
     private static final Scanner scanner = new Scanner(System.in);
     private static String customerRef = null;
 
@@ -74,6 +75,8 @@ public class ArsSimulator {
         String verifyResponse = post("/verify-pin",
                 "{\"customerRef\":\"" + customerRef + "\", \"pin\":\"" + pin + "\"}");
 
+        String caseId = extract(verifyResponse, "caseId");
+
         if (verifyResponse.contains("\"status\":\"SUCCESS\"")) {
             sleep(500);
             System.out.println("[ARS] 본인 확인이 완료되었습니다.");
@@ -116,15 +119,18 @@ public class ArsSimulator {
             String selectedStatus = statuses.size() > choice - 1 ? statuses.get(choice - 1) : "ACTIVE";
             if ("LOST".equals(selectedStatus)) {
                 System.out.println("[ARS] 이미 분실 신고가 접수된 카드입니다.");
+                post("/close-case", "{\"caseId\":\"" + caseId + "\", \"note\":\"분실 신고 카드 재선택 (종료)\"}");
                 System.out.println("[System] (통화 종료)");
                 return;
             }
             selectedRefs.add(cardRefs.get(choice - 1));
         } else if (choice == 0) {
             System.out.println("[ARS] 이용해 주셔서 감사합니다.");
+            post("/close-case", "{\"caseId\":\"" + caseId + "\", \"note\":\"사용자 종료\"}");
             return;
         } else {
             System.out.println("[ARS] 잘못된 입력입니다. 통화를 종료합니다.");
+            post("/close-case", "{\"caseId\":\"" + caseId + "\", \"note\":\"잘못된 입력으로 인한 종료\"}");
             return;
         }
 
@@ -138,7 +144,8 @@ public class ArsSimulator {
 
         String refsJson = "[\"" + String.join("\",\"", selectedRefs) + "\"]";
         String reportResponse = post("/report-loss",
-                "{\"customerRef\":\"" + customerRef + "\", \"selectedCardRefs\":" + refsJson + "}");
+                "{\"customerRef\":\"" + customerRef + "\", \"caseId\":\"" + caseId + "\", \"selectedCardRefs\":"
+                        + refsJson + "}");
 
         if (reportResponse.contains("\"success\":true")) {
             // Generate a random receipt number for realism

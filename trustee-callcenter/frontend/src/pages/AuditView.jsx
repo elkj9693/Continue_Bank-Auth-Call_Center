@@ -27,37 +27,61 @@ export default function AuditView() {
         }
     };
 
-    const getStatusBadge = (status) => {
+    const getStatusBadge = (log) => {
+        const { status, resultNote, channel } = log;
+
+        // resultNote가 있으면 그것을 라벨로 사용
+        if (resultNote && resultNote !== "처리 완료") {
+            let color = 'var(--success)';
+            let bg = 'rgba(0, 208, 130, 0.1)';
+            let icon = <CheckCircle2 size={14} />;
+
+            if (status === 'FAILED' || status === 'REJECTED' || resultNote.includes('실패') || resultNote.includes('거절')) {
+                color = 'var(--danger)';
+                bg = 'rgba(240, 68, 82, 0.1)';
+                icon = <XCircle size={14} />;
+            } else if (status === 'OPEN') {
+                color = 'var(--primary)';
+                bg = 'rgba(49, 130, 246, 0.1)';
+                icon = <Clock size={14} />;
+            }
+
+            return { label: resultNote, color, bg, icon };
+        }
+
+        // 기본 상태 맵핑 (fallback)
         switch (status) {
+            case 'CLOSED':
             case 'COMPLETED':
-                return { label: '상담 성공', color: 'var(--success)', bg: 'rgba(0, 208, 130, 0.1)', icon: <CheckCircle2 size={14} /> };
+                return { label: '처리 완료', color: 'var(--success)', bg: 'rgba(0, 208, 130, 0.1)', icon: <CheckCircle2 size={14} /> };
+            case 'FAILED':
             case 'REJECTED':
-                return { label: '거절/실패', color: 'var(--danger)', bg: 'rgba(240, 68, 82, 0.1)', icon: <XCircle size={14} /> };
-            case 'NO_ANSWER':
-                return { label: '부재중', color: 'var(--warning)', bg: 'rgba(255, 187, 0, 0.1)', icon: <Clock size={14} /> };
+                return { label: '실패/거절', color: 'var(--danger)', bg: 'rgba(240, 68, 82, 0.1)', icon: <XCircle size={14} /> };
+            case 'OPEN':
+                return { label: '진행 중', color: 'var(--primary)', bg: 'rgba(49, 130, 246, 0.1)', icon: <Clock size={14} /> };
             default:
                 return { label: status, color: 'var(--text-dim)', bg: '#f2f4f6', icon: <AlertCircle size={14} /> };
         }
     };
 
     const filteredLogs = logs.filter(log =>
-        log.name?.includes(searchTerm) || log.phone?.includes(searchTerm)
+        log.customerRef?.includes(searchTerm) || log.serviceType?.includes(searchTerm)
     );
 
     return (
         <div className="animate-up">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '24px' }}>
                 <div>
-                    <h2 style={{ fontSize: '24px', fontWeight: '800', marginBottom: '8px' }}>상담 이력</h2>
+                    <h2 style={{ fontSize: '24px', fontWeight: '800', marginBottom: '8px' }}>상담 통합 이력</h2>
                     <p style={{ color: 'var(--text-dim)', fontWeight: '600' }}>
-                        총 {logs.length}건의 상담 기록이 있습니다.
+                        수탁사 로컬 RDS에 기록된 {logs.length}건의 증적이 있습니다.
                     </p>
                 </div>
                 <div style={{ position: 'relative', width: '300px' }}>
                     <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-dim)' }} />
                     <input
                         className="input"
-                        placeholder="이름 또는 전화번호 검색"
+                        placeholder="고객 토큰 또는 유형 검색"
                         style={{ paddingLeft: '44px', paddingRight: '16px', borderRadius: '20px' }}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -72,19 +96,25 @@ export default function AuditView() {
             ) : filteredLogs.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     {filteredLogs.map((log) => {
-                        const badge = getStatusBadge(log.status);
+                        const badge = getStatusBadge(log);
                         return (
-                            <div key={log.leadId} className="toss-card" style={{ padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <div key={log.id} className="toss-card" style={{ padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                                    <div className="avatar" style={{ background: '#f2f4f6', color: '#191f28', width: '48px', height: '48px', fontSize: '18px', borderRadius: '18px' }}>
-                                        {log.name ? log.name.charAt(0) : '?'}
+                                    <div className="avatar" style={{
+                                        background: log.channel === 'ARS' ? '#e8f3ff' : '#f2f4f6',
+                                        color: log.channel === 'ARS' ? 'var(--primary)' : '#191f28',
+                                        width: '48px', height: '48px', fontSize: '18px', borderRadius: '18px'
+                                    }}>
+                                        {log.channel === 'ARS' ? 'A' : 'O'}
                                     </div>
                                     <div>
-                                        <div style={{ fontSize: '18px', fontWeight: '800', marginBottom: '4px' }}>{log.name}</div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', color: 'var(--text-dim)', fontWeight: '500' }}>
-                                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Phone size={14} /> {log.phone}</span>
+                                        <div style={{ fontSize: '16px', fontWeight: '800', marginBottom: '4px', color: '#333d4b' }}>
+                                            {log.customerRef} <span style={{ fontSize: '12px', color: 'var(--text-dim)', fontWeight: '500' }}>(가명 토큰)</span>
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', color: 'var(--text-dim)', fontWeight: '600' }}>
+                                            <span style={{ color: 'var(--primary)' }}>[{log.channel}]</span>
                                             <span style={{ width: '1px', height: '10px', background: '#d1d6db' }}></span>
-                                            <span>{log.requestedProductType}</span>
+                                            <span>{log.serviceType === 'LOSS_REPORT' ? '분실/정지' : '마케팅 상담'}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -106,7 +136,7 @@ export default function AuditView() {
                                         {badge.label}
                                     </div>
                                     <div style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: '600' }}>
-                                        {log.contactedAt ? new Date(log.contactedAt).toLocaleString() : '일시 정보 없음'}
+                                        {log.createdAt ? new Date(log.createdAt).toLocaleString() : '일시 정보 없음'}
                                     </div>
                                 </div>
                             </div>

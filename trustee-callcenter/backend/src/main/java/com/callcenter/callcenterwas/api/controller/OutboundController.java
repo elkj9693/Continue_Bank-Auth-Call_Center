@@ -16,6 +16,10 @@ import java.util.stream.Collectors;
 public class OutboundController {
 
     private final IssuerClient issuerClient;
+    private final com.callcenter.callcenterwas.domain.consultation.service.ConsultationService consultationService;
+    private final com.callcenter.callcenterwas.domain.log.service.LogService logService;
+    private final com.callcenter.callcenterwas.domain.consent.repository.MarketingConsentRepository marketingConsentRepository;
+    private final com.callcenter.callcenterwas.domain.consultation.repository.ConsultationCaseRepository consultationCaseRepository;
 
     /**
      * Get target leads for outbound calls (Data Masking Applied)
@@ -25,28 +29,29 @@ public class OutboundController {
         log.info("[Outbound] Fetching leads from issuer");
         List<Map<String, Object>> leads = issuerClient.getOutboundLeads();
 
-        // Data Masking Simulation
+        // Data Masking Simulation (PII Protection)
         return maskLeads(leads);
     }
 
     /**
-     * Get consultation history
+     * Get consultation history (NOW FROM LOCAL DB)
      */
     @GetMapping("/history")
-    public List<Map<String, Object>> getHistory() {
-        log.info("[Outbound] Fetching history from issuer");
-        List<Map<String, Object>> leads = issuerClient.getOutboundHistory();
-        return maskLeads(leads);
+    public List<com.callcenter.callcenterwas.domain.consultation.entity.ConsultationCase> getHistory() {
+        log.info("[Outbound] Fetching consultation history from LOCAL RDS");
+        return consultationCaseRepository.findAll();
     }
 
     private List<Map<String, Object>> maskLeads(List<Map<String, Object>> leads) {
         return leads.stream().map(lead -> {
-            String name = (String) lead.get("name");
-            String phone = (String) lead.get("phone");
+            @SuppressWarnings("unchecked")
+            Map<String, Object> leadMap = new java.util.HashMap<>(lead);
+            String name = (String) leadMap.get("name");
+            String phone = (String) leadMap.get("phone");
 
-            lead.put("name", maskName(name));
-            lead.put("phone", maskPhone(phone));
-            return lead;
+            leadMap.put("name", maskName(name));
+            leadMap.put("phone", maskPhone(phone));
+            return leadMap;
         }).collect(Collectors.toList());
     }
 
@@ -55,16 +60,43 @@ public class OutboundController {
      */
     @PostMapping("/result")
     public Map<String, Object> submitResult(@RequestBody Map<String, Object> request) {
-        String leadId = request.get("leadId").toString();
+        // leadId를 customerRef로 간주 (데모 시나리오)
+        String customerRef = request.get("leadId").toString();
         String status = (String) request.get("status");
         String agentId = (String) request.get("agentId");
 
-        log.info("[Outbound] Updating lead {} result to {} by agent {}", leadId, status, agentId);
+        log.info("[Outbound] Submitting result for customerRef: {}, status: {}", customerRef, status);
 
-        issuerClient.updateLeadResult(leadId, status);
+        // 1. 로컬 상담 케이스 생성 (OUTBOUND - MARKETING)
+        com.callcenter.callcenterwas.domain.consultation.entity.ConsultationCase consultationCase = consultationService
+                .createCase("OUTBOUND", "MARKETING", customerRef, agentId);
 
-        // Audit Logging
-        issuerClient.sendAuditEvent("OUTBOUND_COUNSEL", "SUCCESS", agentId, "Consultation result: " + status);
+        // 2. 마케팅 동의 정보 저장 (AGREED인 경우)
+        if ("AGREED".equals(status)) {
+            com.callcenter.callcenterwas.domain.consent.entity.MarketingConsent consent = com.callcenter.callcenterwas.domain.consent.entity.MarketingConsent
+                    .builder()
+                    .customerRef(customerRef)
+                    .consentStatus("AGREED")
+                    .channel("OUTBOUND")
+                    .campaignId("CAMP_2024_PROMO")
+                    .consentEvidenceKey("REC_" + System.currentTimeMillis() + ".mp3") // Pseudonymous Key
+                    .build();
+            marketingConsentRepository.save(consent);
+        }
+
+        // 3. 위탁사(Bank)로 결과 전송 (동기화)
+        issuerClient.updateLeadResult(customerRef, status);
+
+        // 4. 연동 로그 및 감사 로그 기록
+        logService.logIntegration("N/A", "/api/v1/outbound/result", "POST",
+                200, "Outbound Result Sync: " + status);
+
+        logService.logAudit(agentId, "SUBMIT_OUTBOUND_RESULT", consultationCase.getId().toString(), "CASE",
+                "Status: " + status);
+
+        // 5. 케이스 종료 (사용자 친화적인 메시지 포함)
+        String resultNote = "AGREED".equals(status) ? "상담 완료 (동의함)" : "상담 완료 (거절함)";
+        consultationService.closeCase(consultationCase.getId(), resultNote);
 
         return Map.of("success", true);
     }
