@@ -22,7 +22,7 @@ services:
 
   # Bank Backend
   entrusting-backend:
-    build: ./entrusting-client/backend
+    build: ../entrusting-client/backend
     container_name: entrusting-backend
     restart: on-failure
     ports:
