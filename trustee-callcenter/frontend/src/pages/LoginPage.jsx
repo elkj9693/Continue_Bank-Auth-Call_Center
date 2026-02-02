@@ -8,18 +8,34 @@ export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-        setTimeout(() => {
-            if (username === "agent001" && password === "password") {
-                sessionStorage.setItem("callcenter-user", username);
+
+        try {
+            const response = await fetch("http://localhost:8082/api/v1/auth/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ username, password }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // 로그인 성공 시 세션 저장
+                sessionStorage.setItem("callcenter-user", data.name);
                 navigate("/outbound");
             } else {
-                alert("아이디 또는 비밀번호가 올바르지 않습니다.");
-                setIsLoading(false);
+                alert(data.message || "아이디 또는 비밀번호가 올바르지 않습니다.");
             }
-        }, 1000);
+        } catch (error) {
+            console.error("Login Error:", error);
+            alert("서버 연결에 실패했습니다.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -46,7 +62,7 @@ export default function LoginPage() {
                         안녕하세요,<br />오늘도 힘내세요!
                     </h1>
                     <p style={{ color: 'var(--text-dim)', fontSize: '17px', fontWeight: '600' }}>
-                        콜센터 관리 시스템에 로그인해 주세요.
+                        Davada 콜센터 시스템에 로그인해 주세요.
                     </p>
                 </div>
 

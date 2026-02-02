@@ -42,4 +42,5 @@ public class CardController {
                 "processedCount", cardRefs.size(),
                 "timestamp", LocalDateTime.now().toString());
     }
+
 }

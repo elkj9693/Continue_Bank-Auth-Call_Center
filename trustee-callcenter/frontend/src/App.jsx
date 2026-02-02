@@ -33,7 +33,10 @@ function ProtectedLayout({ children }) {
         <div className="sidebar-header">
           <div className="brand-title">
             <Headphones size={24} strokeWidth={2.5} />
-            <span>Continue</span>
+            <span>Davada</span>
+          </div>
+          <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginTop: '4px', fontWeight: '500' }}>
+            Continue Bank 전담팀
           </div>
         </div>
 
@@ -82,7 +85,7 @@ function ProtectedLayout({ children }) {
       <div className="main-container">
         <header className="top-bar">
           <div className="page-title">
-            {location.pathname === '/outbound' ? '아웃바운드' :
+            {location.pathname === '/outbound' ? 'Continue Bank' :
               location.pathname === '/logs' ? '상담 이력' : '대시보드'}
           </div>
           <div style={{ color: 'var(--text-dim)', fontSize: '14px', fontWeight: '600' }}>
@@ -119,7 +122,7 @@ function App() {
             </ProtectedLayout>
           }
         />
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Navigate to="/outbound" replace />} />
       </Routes>
     </BrowserRouter>
   );

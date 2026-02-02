@@ -40,12 +40,12 @@ const Dashboard = () => {
     // 1. 사용자 이름 설정
     const registerData = sessionStorage.getItem('register_form_data');
     const userProfile = sessionStorage.getItem('user_profile');
-    
+
     if (userProfile) {
-        try {
-            const parsed = JSON.parse(userProfile);
-            if (parsed.name) setUserName(parsed.name);
-        } catch (e) {}
+      try {
+        const parsed = JSON.parse(userProfile);
+        if (parsed.name) setUserName(parsed.name);
+      } catch (e) { }
     } else if (registerData) {
       try {
         const parsed = JSON.parse(registerData);
@@ -113,7 +113,7 @@ const Dashboard = () => {
       <header className="sticky top-0 z-20 flex items-center justify-between h-16 px-6 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <Logo className="h-7" />
         <div className="flex items-center gap-2">
-          <button 
+          <button
             onClick={() => navigate('/mypage')}
             className="p-2.5 text-gray-500 hover:bg-gray-50 rounded-full transition-colors"
             title="내 정보"
@@ -146,29 +146,29 @@ const Dashboard = () => {
         </section>
 
         {/* Marketing Banner Stage 1 */}
-          <section
-            onClick={() => setIsModalOpen(true)}
-            className="bg-gradient-to-br from-[#1A73E8] to-[#0D47A1] rounded-[24px] p-6 text-white relative overflow-hidden shadow-xl shadow-blue-100 cursor-pointer group active:scale-[0.98] transition-all"
-          >
-            <div className="relative z-10">
-              <div className="bg-amber-400 text-blue-900 text-[10px] font-black px-2 py-0.5 rounded-md inline-block mb-3 uppercase tracking-tighter shadow-sm">EVENT</div>
-              <h3 className="text-[24px] font-bold leading-tight mb-1">연회비 무료 & 스타벅스 쿠폰 🎁</h3>
-              <p className="text-blue-100/90 text-[14px] font-medium leading-relaxed">Continue 카드 상담만 해도 커피 쿠폰 증정!</p>
-              
-              <div className="mt-5 flex items-center gap-1 text-[11px] text-blue-200/80 font-bold">
-                <AlertCircle size={12} />
-                <span>동의 시 개인정보가 상담 목적으로 TM센터에 제공됩니다.</span>
-              </div>
+        <section
+          onClick={() => setIsModalOpen(true)}
+          className="bg-gradient-to-br from-[#1A73E8] to-[#0D47A1] rounded-[24px] p-6 text-white relative overflow-hidden shadow-xl shadow-blue-100 cursor-pointer group active:scale-[0.98] transition-all"
+        >
+          <div className="relative z-10 flex flex-col items-center text-center">
+            <div className="bg-amber-400 text-blue-900 text-[10px] font-black px-2 py-0.5 rounded-md inline-block mb-3 uppercase tracking-tighter shadow-sm">EVENT</div>
+            <h3 className="text-[24px] font-bold leading-tight mb-1">연회비 무료 & 스타벅스 쿠폰 🎁</h3>
+            <p className="text-blue-100/90 text-[14px] font-medium leading-relaxed">Continue 카드 상담만 해도 커피 쿠폰 증정!</p>
+
+            <div className="mt-5 flex items-center gap-1 text-[11px] text-blue-200/80 font-bold">
+              <AlertCircle size={12} />
+              <span>동의 시 개인정보가 상담 목적으로 TM센터에 제공됩니다.</span>
             </div>
-            
-            {/* Decors */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
-            <Gift size={80} className="absolute -bottom-4 -right-2 text-white/10 rotate-12 transition-transform group-hover:scale-110" />
-            
-            <div className="absolute bottom-6 right-6 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm transition-transform group-hover:translate-x-1">
-              <ChevronRight size={18} />
-            </div>
-          </section>
+          </div>
+
+          {/* Decors */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+          <Gift size={80} className="absolute -bottom-4 -right-2 text-white/10 rotate-12 transition-transform group-hover:scale-110" />
+
+          <div className="absolute bottom-6 right-6 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm transition-transform group-hover:translate-x-1">
+            <ChevronRight size={18} />
+          </div>
+        </section>
 
 
         <section className="space-y-6">

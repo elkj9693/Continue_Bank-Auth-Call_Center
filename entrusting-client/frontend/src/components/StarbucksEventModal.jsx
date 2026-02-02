@@ -85,7 +85,7 @@ const StarbucksEventModal = ({ isOpen, onClose }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={handleClose}></div>
 
-            <div className={`relative bg-white w-full max-w-sm rounded-[32px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 ${step === 3 ? 'bg-[#1e3932]' : ''}`}>
+            <div className={`relative bg-white w-full max-w-[420px] max-h-[90vh] overflow-y-auto rounded-[32px] shadow-2xl animate-in zoom-in-95 duration-300 ${step === 3 ? 'bg-[#1e3932]' : ''}`}>
                 {/* Close Button */}
                 <button
                     onClick={handleClose}
@@ -133,16 +133,16 @@ const StarbucksEventModal = ({ isOpen, onClose }) => {
                 )}
 
                 {step === 2 && (
-                    <div className="flex flex-col h-full bg-white">
-                        <div className="p-8 pb-0">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2">약관 동의</h2>
-                            <p className="text-gray-500 text-sm leading-relaxed">
+                    <div className="flex flex-col bg-white">
+                        <div className="px-8 pt-12 pb-2">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-3 leading-normal">약관 동의</h2>
+                            <p className="text-gray-500 text-base leading-relaxed">
                                 이벤트 참여 및 경품 발송을 위해<br />
                                 아래 약관에 동의해 주세요.
                             </p>
                         </div>
 
-                        <div className="p-8 space-y-5 flex-1">
+                        <div className="p-8 pt-4 space-y-6">
                             {/* Essential Consent */}
                             <div
                                 className="flex items-start gap-3 p-4 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-gray-300 transition-colors"
@@ -210,7 +210,7 @@ const StarbucksEventModal = ({ isOpen, onClose }) => {
                                 언제든 쿠폰함에서 확인하실 수 있습니다.
                             </p>
 
-                            <div className="bg-white p-6 rounded-3xl shadow-2xl mb-8 transform hover:scale-105 transition-transform duration-300">
+                            <div className="bg-white p-6 rounded-3xl shadow-2xl mb-8 transform hover:scale-105 transition-transform duration-300 flex flex-col items-center">
                                 <div className="flex items-center gap-3 mb-4 border-b border-gray-100 pb-4">
                                     <div className="w-10 h-10 bg-[#00704A] rounded-full flex items-center justify-center">
                                         <Coffee size={20} className="text-white" />
