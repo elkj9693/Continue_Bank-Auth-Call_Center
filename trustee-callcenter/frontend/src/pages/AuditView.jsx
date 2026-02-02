@@ -13,7 +13,7 @@ export default function AuditView() {
     const fetchHistory = async () => {
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:8082/api/v1/outbound/history');
+            const res = await fetch('/api/v1/outbound/history');
             if (res.ok) {
                 const data = await res.json();
                 // Sort by contactedAt desc if available, otherwise by logic

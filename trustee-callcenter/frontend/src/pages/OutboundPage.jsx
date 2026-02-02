@@ -12,7 +12,7 @@ import {
     ChevronRight
 } from "lucide-react";
 
-const API_BASE = "http://localhost:8082";
+const API_BASE = ""; // Relative path using Vite proxy
 
 export default function OutboundPage() {
     const [targets, setTargets] = useState([]);
