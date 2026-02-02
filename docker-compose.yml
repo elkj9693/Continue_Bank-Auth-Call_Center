@@ -16,7 +16,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       timeout: 20s
       retries: 10
 
@@ -35,7 +35,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       timeout: 20s
       retries: 10
 
@@ -54,7 +54,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       timeout: 20s
       retries: 10
 
@@ -111,6 +111,36 @@ services:
     restart: on-failure
     ports:
       - "5176:80"
+    networks:
+      - app-network
+
+  # Call Center (TM Center)
+  callcenter-backend:
+    build: ./trustee-callcenter/backend
+    container_name: callcenter-backend
+    restart: on-failure
+    ports:
+      - "8082:8082"
+    depends_on:
+      mysql-callcenter:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-callcenter:3306/callcenter_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: continue12!
+      ISSUER_API_URL: http://entrusting-backend:8085
+    networks:
+      - app-network
+
+  callcenter-frontend:
+    build:
+      context: ./trustee-callcenter/frontend
+      args:
+        VITE_API_BASE_URL: http://localhost:8082
+    container_name: callcenter-frontend
+    restart: on-failure
+    ports:
+      - "5178:80"
     networks:
       - app-network
 

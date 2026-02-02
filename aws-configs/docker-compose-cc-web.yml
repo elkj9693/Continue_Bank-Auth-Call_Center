@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  callcenter-frontend:
+    build:
+      context: ../trustee-callcenter/frontend
+      args:
+        # Crucial: Use relative /api for the frontend to hit the Nginx proxy
+        VITE_API_BASE_URL: /api
+    container_name: callcenter-frontend
+    restart: on-failure
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx-cc.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - cc-network
+
+networks:
+  cc-network:
+    driver: bridge
