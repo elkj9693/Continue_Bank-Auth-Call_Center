@@ -31,9 +31,9 @@ services:
       mysql-entrusting:
         condition: service_healthy
     environment:
-      DB_URL: jdbc:mysql://mysql-entrusting:3306/entrusting_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      DB_USER: root
-      DB_PASSWORD: continue12!
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-entrusting:3306/entrusting_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: continue12!
       # TRUSTEE_API_URL: Removed as per user request
       ALLOWED_ORIGINS: "*"
     networks:
