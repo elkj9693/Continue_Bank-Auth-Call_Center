@@ -123,9 +123,24 @@ public class ArsService {
                             "status", c.getStatus()))
                     .collect(Collectors.toList());
 
+            // [NEW] Fetch User Name for Call Center Display
+            // Assuming customerRef is User ID
+            String customerName = "Unknown";
+            try {
+                Long userId = Long.valueOf(customerRef);
+                User user = userRepository.findById(userId).orElse(null);
+                if (user != null) {
+                    String plainName = EncryptionUtils.decrypt(user.getName());
+                    customerName = maskName(plainName);
+                }
+            } catch (Exception e) {
+                log.warn("[ARS-DEBUG] Failed to fetch user name for ref: {}", customerRef);
+            }
+
             return Map.of(
                     "success", true,
                     "status", "SUCCESS",
+                    "customerName", customerName,
                     "cards", cardList);
         } else {
             log.error("[ARS-DEBUG] PIN Mismatch");
@@ -158,5 +173,22 @@ public class ArsService {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("SHA-256 not available", e);
         }
+
+    private String maskName(String name) {
+        if (name == null || name.length() < 2) {
+            return name;
+        }
+        if (name.length() == 2) {
+            return name.charAt(0) + "*";
+        }
+        // "홍길동" -> "홍*동"
+        // "남궁민수" -> "남**수" (첫글자 + 중간마스킹 + 끝글자)
+        StringBuilder masked = new StringBuilder();
+        masked.append(name.charAt(0));
+        for (int i = 1; i < name.length() - 1; i++) {
+            masked.append('*');
+        }
+        masked.append(name.charAt(name.length() - 1));
+        return masked.toString();
     }
 }

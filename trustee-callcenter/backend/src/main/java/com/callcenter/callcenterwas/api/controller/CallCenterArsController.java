@@ -46,16 +46,18 @@ public class CallCenterArsController {
      * Verify PIN with 3-Tier Security (Encryption)
      */
     @PostMapping("/verify-pin")
+    @PostMapping("/verify-pin")
     public Map<String, Object> verifyPin(@RequestBody Map<String, String> request) {
         String customerRef = request.get("customerRef");
-        String customerName = request.get("customerName"); // [NEW] 이름 수신
+        // [MODIFIED] ARS does not send customerName, so we start with anonymous
         String pin = request.get("pin");
 
-        log.info("[ARS] Verifying PIN for customerRef: {} ({}) using 3-Tier Security", customerRef, customerName);
+        log.info("[ARS] Verifying PIN for customerRef: {} using 3-Tier Security", customerRef);
 
         // 1. 상담 케이스 생성 (ARS - LOSS_REPORT)
+        // Initially masked name is unknown ("익명")
         com.callcenter.callcenterwas.domain.consultation.entity.ConsultationCase consultationCase = consultationService
-                .createCase("ARS", "LOSS_REPORT", customerRef, customerName, "SYSTEM");
+                .createCase("ARS", "LOSS_REPORT", customerRef, null, "SYSTEM");
 
         try {
             // STEP 1: Get Public Key from Bank (Issuer)
@@ -75,6 +77,13 @@ public class CallCenterArsController {
             // STEP 4: Send Encrypted PIN to Bank for Verification
             Map<String, Object> result = issuerClient.verifyPin(customerRef, kid, ciphertext);
             boolean success = (boolean) result.get("success");
+
+            // [NEW] Update Customer Name if returned by Bank
+            if (success && result.containsKey("customerName")) {
+                String fetchedName = (String) result.get("customerName");
+                consultationService.updateCustomerName(consultationCase.getId(), fetchedName);
+                log.info("[ARS] Updated Case {} with Customer Name: {}", consultationCase.getId(), fetchedName);
+            }
 
             // 2. 인증 로그 기록
             logService.logArsAuth(consultationCase.getId(), customerRef, "ARS_PIN",

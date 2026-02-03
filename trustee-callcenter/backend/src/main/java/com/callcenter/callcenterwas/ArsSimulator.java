@@ -75,8 +75,7 @@ public class ArsSimulator {
         // Simulate secure transmission
         // System.out.println("[System] (PIN 암호화 및 은행 서버 검증 중...)");
         String verifyResponse = post("/verify-pin",
-                "{\"customerRef\":\"" + customerRef + "\", \"customerName\":\"" + name + "\", \"pin\":\"" + pin
-                        + "\"}");
+                "{\"customerRef\":\"" + customerRef + "\", \"pin\":\"" + pin + "\"}");
 
         String caseId = extract(verifyResponse, "caseId");
 

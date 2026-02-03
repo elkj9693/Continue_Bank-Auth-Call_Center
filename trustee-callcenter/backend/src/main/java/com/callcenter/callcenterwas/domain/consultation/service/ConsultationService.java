@@ -49,4 +49,12 @@ public class ConsultationService {
             consultationCaseRepository.save(c);
         });
     }
+
+    @Transactional
+    public void updateCustomerName(Long caseId, String customerName) {
+        consultationCaseRepository.findById(caseId).ifPresent(c -> {
+            c.setCustomerName(customerName);
+            consultationCaseRepository.save(c);
+        });
+    }
 }
