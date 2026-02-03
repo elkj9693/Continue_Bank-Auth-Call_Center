@@ -36,7 +36,11 @@ export default function AuditView() {
             let bg = 'rgba(0, 208, 130, 0.1)';
             let icon = <CheckCircle2 size={14} />;
 
-            if (status === 'FAILED' || status === 'REJECTED' || resultNote.includes('실패') || resultNote.includes('거절')) {
+            if (resultNote.includes('부재중') || status === 'NO_ANSWER') {
+                color = '#FFB800'; // 선명한 노란색/주황색
+                bg = 'rgba(255, 184, 0, 0.1)';
+                icon = <Clock size={14} />;
+            } else if (status === 'FAILED' || status === 'REJECTED' || resultNote.includes('실패') || resultNote.includes('거절')) {
                 color = 'var(--danger)';
                 bg = 'rgba(240, 68, 82, 0.1)';
                 icon = <XCircle size={14} />;
