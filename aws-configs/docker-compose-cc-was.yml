@@ -13,6 +13,10 @@ services:
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: continue12!
       ISSUER_API_URL: http://10.0.11.132:8085
+      # AWS S3 Configuration
+      SPRING_CLOUD_AWS_REGION_STATIC: ap-northeast-1
+      SPRING_CLOUD_AWS_CREDENTIALS_ACCESS_KEY: [ YOUR_ACCESS_KEY ] # 만약 IAM Role이 안 되면 여기에 키 입력
+      SPRING_CLOUD_AWS_CREDENTIALS_SECRET_KEY: [ YOUR_SECRET_KEY ] # 만약 IAM Role이 안 되면 여기에 키 입력
     networks:
       - cc-network
 
