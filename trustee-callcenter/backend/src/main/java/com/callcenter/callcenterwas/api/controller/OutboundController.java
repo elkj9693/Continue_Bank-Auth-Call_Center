@@ -71,8 +71,8 @@ public class OutboundController {
         com.callcenter.callcenterwas.domain.consultation.entity.ConsultationCase consultationCase = consultationService
                 .createCase("OUTBOUND", "MARKETING", customerRef, agentId);
 
-        // 2. 마케팅 동의 정보 저장 (AGREED인 경우)
-        if ("AGREED".equals(status)) {
+        // 2. 마케팅 동의 정보 저장 (COMPLETED인 경우 -> 관심 있음)
+        if ("COMPLETED".equals(status)) {
             com.callcenter.callcenterwas.domain.consent.entity.MarketingConsent consent = com.callcenter.callcenterwas.domain.consent.entity.MarketingConsent
                     .builder()
                     .customerRef(customerRef)
@@ -95,7 +95,14 @@ public class OutboundController {
                 "Status: " + status);
 
         // 5. 케이스 종료 (사용자 친화적인 메시지 포함)
-        String resultNote = "AGREED".equals(status) ? "상담 완료 (동의함)" : "상담 완료 (거절함)";
+        String resultNote;
+        if ("COMPLETED".equals(status)) {
+            resultNote = "상담 완료 (관심 있음)";
+        } else if ("NO_ANSWER".equals(status)) {
+            resultNote = "상담 실패 (부재중)";
+        } else {
+            resultNote = "상담 완료 (거절함)";
+        }
         consultationService.closeCase(consultationCase.getId(), resultNote);
 
         return Map.of("success", true);

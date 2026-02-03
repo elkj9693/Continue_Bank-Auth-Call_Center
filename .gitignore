@@ -6,11 +6,12 @@
 
 # Java / Maven / Gradle
 target/
-build/
+**/build/
 .gradle/
-gradle/
-!gradle/wrapper/gradle-wrapper.jar
-!gradle/wrapper/gradle-wrapper.properties
+**/gradle/wrapper/gradle-wrapper.jar
+**/gradle/wrapper/gradle-wrapper.properties
+!**/gradle/wrapper/gradle-wrapper.jar
+!**/gradle/wrapper/gradle-wrapper.properties
 *.class
 *.log
 *.jar
