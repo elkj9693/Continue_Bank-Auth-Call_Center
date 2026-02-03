@@ -26,6 +26,7 @@ public class S3Service {
 
     /**
      * Upload call recording to S3
+     * 
      * @return S3 Key (path)
      */
     public String uploadRecording(String customerRef, String campaignId, byte[] audioData) {
@@ -42,14 +43,18 @@ public class S3Service {
                     .build();
 
             s3Client.putObject(putOb, RequestBody.fromBytes(audioData));
-            
+
             log.info("[S3] Uploaded recording: {}", key);
             logService.logIntegration("N/A", "S3 Upload", "PUT", 200, "Uploaded recording: " + key);
-            
+
             return key;
         } catch (Exception e) {
             log.error("[S3] Upload failed", e);
-            logService.logIntegration("N/A", "S3 Upload", "PUT", 500, "Upload failed: " + e.getMessage());
+            String errorMsg = "Upload failed: " + e.getMessage();
+            if (errorMsg.length() > 200)
+                errorMsg = errorMsg.substring(0, 200) + "...";
+
+            logService.logIntegration("N/A", "S3 Upload", "PUT", 500, errorMsg);
             throw new RuntimeException("S3 Upload Failed", e);
         }
     }
