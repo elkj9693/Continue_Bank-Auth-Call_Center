@@ -67,7 +67,8 @@ public class OutboundController {
         String status = (String) request.get("status");
         String agentId = (String) request.get("agentId");
 
-        log.info("[Outbound] Submitting result for customerRef: {}, status: {}", customerRef, status);
+        log.info("[Outbound] Submitting result for customerRef: {}, Name: {}, status: {}", customerRef, customerName,
+                status);
 
         // 1. 로컬 상담 케이스 생성 (OUTBOUND - MARKETING)
         com.callcenter.callcenterwas.domain.consultation.entity.ConsultationCase consultationCase = consultationService
