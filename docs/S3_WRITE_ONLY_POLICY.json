@@ -1,0 +1,34 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowTrusteeToUploadOnly",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::015397626545:role/EC2-SSM-Role"
+            },
+            "Action": "s3:PutObject",
+            "Resource": "arn:aws:s3:::continue-bank-recordings/recordings/*",
+            "Condition": {
+                "StringEquals": {
+                    "s3:x-amz-acl": "bucket-owner-full-control"
+                }
+            }
+        },
+        {
+            "Sid": "DenyTrusteeReadAccess",
+            "Effect": "Deny",
+            "Principal": {
+                "AWS": "arn:aws:iam::015397626545:role/EC2-SSM-Role"
+            },
+            "Action": [
+                "s3:GetObject",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::continue-bank-recordings",
+                "arn:aws:s3:::continue-bank-recordings/*"
+            ]
+        }
+    ]
+}

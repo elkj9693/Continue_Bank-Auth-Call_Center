@@ -32,3 +32,13 @@ logging:
   level:
     com.callcenter.callcenterwas: DEBUG
     org.springframework.web: INFO
+
+cloud:
+  aws:
+    s3:
+      bucket: ${AWS_S3_BUCKET:continue-bank-recordings}
+    region:
+      static: ap-northeast-1
+    credentials:
+      access-key: ${AWS_ACCESS_KEY_ID:}
+      secret-key: ${AWS_SECRET_ACCESS_KEY:}

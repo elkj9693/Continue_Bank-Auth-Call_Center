@@ -39,6 +39,7 @@ public class ArsSimulator {
         System.out.println("");
 
         String identifyResponse = post("/identify", "{\"phoneNumber\":\"" + ani + "\"}");
+        System.out.println("[DEBUG] Server Response: " + identifyResponse);
 
         if (identifyResponse.contains("\"found\":true")) {
             String name = extract(identifyResponse, "name");

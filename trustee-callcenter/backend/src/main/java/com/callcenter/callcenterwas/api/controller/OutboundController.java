@@ -19,6 +19,7 @@ public class OutboundController {
     private final com.callcenter.callcenterwas.domain.consultation.service.ConsultationService consultationService;
     private final com.callcenter.callcenterwas.domain.log.service.LogService logService;
     private final com.callcenter.callcenterwas.domain.consent.repository.MarketingConsentRepository marketingConsentRepository;
+    private final com.callcenter.callcenterwas.infrastructure.s3.S3Service s3Service;
     private final com.callcenter.callcenterwas.domain.consultation.repository.ConsultationCaseRepository consultationCaseRepository;
 
     /**
@@ -71,17 +72,39 @@ public class OutboundController {
         com.callcenter.callcenterwas.domain.consultation.entity.ConsultationCase consultationCase = consultationService
                 .createCase("OUTBOUND", "MARKETING", customerRef, agentId);
 
+        String resultNote;
+
         // 2. 마케팅 동의 정보 저장 (COMPLETED인 경우 -> 관심 있음)
         if ("COMPLETED".equals(status)) {
-            com.callcenter.callcenterwas.domain.consent.entity.MarketingConsent consent = com.callcenter.callcenterwas.domain.consent.entity.MarketingConsent
-                    .builder()
-                    .customerRef(customerRef)
-                    .consentStatus("AGREED")
-                    .channel("OUTBOUND")
-                    .campaignId("CAMP_2024_PROMO")
-                    .consentEvidenceKey("REC_" + System.currentTimeMillis() + ".mp3") // Pseudonymous Key
-                    .build();
-            marketingConsentRepository.save(consent);
+            // 1. Consent Creation
+            com.callcenter.callcenterwas.domain.consent.entity.MarketingConsent consent = marketingConsentRepository
+                    .save(com.callcenter.callcenterwas.domain.consent.entity.MarketingConsent.builder()
+                            .customerRef(customerRef)
+                            .consentStatus("AGREED") // Changed from OPT_IN to AGREED to match original logic
+                            .channel("OUTBOUND")
+                            .campaignId("CAMP_2024_PROMO") // Changed from CAMPAIGN_001 to CAMP_2024_PROMO to match
+                                                           // original logic
+                            .build());
+
+            // 2. [NEW] Upload Dummy Recording to S3 (Bank S3)
+            try {
+                byte[] dummyAudio = "Dummy Audio Data for Call Recording Proof".getBytes();
+                String s3Key = s3Service.uploadRecording(customerRef, "CAMP_2024_PROMO", dummyAudio); // Use customerRef
+                                                                                                      // and original
+                                                                                                      // campaign ID
+
+                consent.setConsentEvidenceKey(s3Key);
+                marketingConsentRepository.save(consent);
+
+                resultNote = "상담 완료 (동의함, 녹취: " + s3Key + ")";
+            } catch (Exception e) {
+                log.error("Failed to upload recording for customerRef: {}", customerRef, e);
+                resultNote = "상담 완료 (동의함, 녹취 실패)";
+            }
+        } else if ("NO_ANSWER".equals(status)) {
+            resultNote = "상담 실패 (부재중)";
+        } else {
+            resultNote = "상담 완료 (거절함)";
         }
 
         // 3. 위탁사(Bank)로 결과 전송 (동기화)
@@ -95,14 +118,7 @@ public class OutboundController {
                 "Status: " + status);
 
         // 5. 케이스 종료 (사용자 친화적인 메시지 포함)
-        String resultNote;
-        if ("COMPLETED".equals(status)) {
-            resultNote = "상담 완료 (관심 있음)";
-        } else if ("NO_ANSWER".equals(status)) {
-            resultNote = "상담 실패 (부재중)";
-        } else {
-            resultNote = "상담 완료 (거절함)";
-        }
+        // resultNote is already set above with recording info if applicable
         consultationService.closeCase(consultationCase.getId(), resultNote);
 
         return Map.of("success", true);
