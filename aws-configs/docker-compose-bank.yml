@@ -35,7 +35,7 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: continue12!
       # TRUSTEE_API_URL: Removed as per user request
-      ALLOWED_ORIGINS: "*"
+      ALLOWED_ORIGINS: "http://localhost:5173,http://localhost:5175,https://d39qzchufywt3o.cloudfront.net"
     networks:
       - bank-network
 
