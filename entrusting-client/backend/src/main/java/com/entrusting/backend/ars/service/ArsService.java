@@ -173,6 +173,7 @@ public class ArsService {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("SHA-256 not available", e);
         }
+    }
 
     private String maskName(String name) {
         if (name == null || name.length() < 2) {
