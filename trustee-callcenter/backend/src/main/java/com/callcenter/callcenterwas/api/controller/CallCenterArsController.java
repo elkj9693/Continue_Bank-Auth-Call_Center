@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/callcenter/ars")
+@RequestMapping("/api/v1/ars")
 @RequiredArgsConstructor
 @Slf4j
 public class CallCenterArsController {

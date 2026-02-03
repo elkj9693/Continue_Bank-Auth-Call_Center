@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 public class ArsSimulator {
 
     private static final String BASE_URL = System.getProperty("ars.api.base-url",
-            "http://localhost:8082/callcenter/ars");
+            "http://localhost:8082/api/v1/ars");
     private static final Scanner scanner = new Scanner(System.in);
     private static String customerRef = null;
 
