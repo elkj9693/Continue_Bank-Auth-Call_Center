@@ -41,8 +41,9 @@ public class ArsSimulator {
         String identifyResponse = post("/identify", "{\"phoneNumber\":\"" + ani + "\"}");
         System.out.println("[DEBUG] Server Response: " + identifyResponse);
 
+        String name = null;
         if (identifyResponse.contains("\"found\":true")) {
-            String name = extract(identifyResponse, "name");
+            name = extract(identifyResponse, "name");
             customerRef = extract(identifyResponse, "customerRef");
 
             sleep(500);
@@ -74,7 +75,8 @@ public class ArsSimulator {
         // Simulate secure transmission
         // System.out.println("[System] (PIN 암호화 및 은행 서버 검증 중...)");
         String verifyResponse = post("/verify-pin",
-                "{\"customerRef\":\"" + customerRef + "\", \"pin\":\"" + pin + "\"}");
+                "{\"customerRef\":\"" + customerRef + "\", \"customerName\":\"" + name + "\", \"pin\":\"" + pin
+                        + "\"}");
 
         String caseId = extract(verifyResponse, "caseId");
 
