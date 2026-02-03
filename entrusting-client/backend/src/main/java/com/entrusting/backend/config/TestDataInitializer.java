@@ -51,7 +51,7 @@ public class TestDataInitializer {
                             EncryptionUtils.encrypt(u[0]),
                             u[1],
                             passwordEncoder.encode("test1234"),
-                            plainPhone,
+                            EncryptionUtils.encrypt(plainPhone),
                             true);
                     user.setTermsAgreed(true);
                     user.setPrivacyAgreed(true);
