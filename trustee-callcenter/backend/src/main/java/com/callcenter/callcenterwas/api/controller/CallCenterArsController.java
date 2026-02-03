@@ -46,7 +46,6 @@ public class CallCenterArsController {
      * Verify PIN with 3-Tier Security (Encryption)
      */
     @PostMapping("/verify-pin")
-    @PostMapping("/verify-pin")
     public Map<String, Object> verifyPin(@RequestBody Map<String, String> request) {
         String customerRef = request.get("customerRef");
         // [MODIFIED] ARS does not send customerName, so we start with anonymous
