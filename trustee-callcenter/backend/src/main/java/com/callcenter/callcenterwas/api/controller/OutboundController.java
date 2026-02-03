@@ -82,21 +82,21 @@ public class OutboundController {
                             .customerRef(customerRef)
                             .consentStatus("AGREED") // Changed from OPT_IN to AGREED to match original logic
                             .channel("OUTBOUND")
-                            .campaignId("CAMP_2024_PROMO") // Changed from CAMPAIGN_001 to CAMP_2024_PROMO to match
+                            .campaignId("CAMP_2026_PROMO") // Changed to 2026
                                                            // original logic
                             .build());
 
             // 2. [NEW] Upload Dummy Recording to S3 (Bank S3)
             try {
                 byte[] dummyAudio = "Dummy Audio Data for Call Recording Proof".getBytes();
-                String s3Key = s3Service.uploadRecording(customerRef, "CAMP_2024_PROMO", dummyAudio); // Use customerRef
-                                                                                                      // and original
+                String s3Key = s3Service.uploadRecording(customerRef, "CAMP_2026_PROMO", dummyAudio); // Use customerRef
+                                                                                                      // and updated
                                                                                                       // campaign ID
 
                 consent.setConsentEvidenceKey(s3Key);
                 marketingConsentRepository.save(consent);
 
-                resultNote = "상담 완료 (동의함, 녹취: " + s3Key + ")";
+                resultNote = "상담 완료 (동의함, 녹취 성공)";
             } catch (Exception e) {
                 log.error("Failed to upload recording for customerRef: {}", customerRef, e);
                 resultNote = "상담 완료 (동의함, 녹취 실패)";
