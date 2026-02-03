@@ -58,6 +58,7 @@ export default function OutboundPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     leadId: selectedLead.leadId,
+                    customerName: selectedLead.name, // [NEW] 이름 전송
                     status: outcome,
                     agentId: sessionStorage.getItem("callcenter-user") || "AGENT_001"
                 }),

@@ -48,13 +48,14 @@ public class CallCenterArsController {
     @PostMapping("/verify-pin")
     public Map<String, Object> verifyPin(@RequestBody Map<String, String> request) {
         String customerRef = request.get("customerRef");
+        String customerName = request.get("customerName"); // [NEW] 이름 수신
         String pin = request.get("pin");
 
-        log.info("[ARS] Verifying PIN for customerRef: {} using 3-Tier Security", customerRef);
+        log.info("[ARS] Verifying PIN for customerRef: {} ({}) using 3-Tier Security", customerRef, customerName);
 
         // 1. 상담 케이스 생성 (ARS - LOSS_REPORT)
         com.callcenter.callcenterwas.domain.consultation.entity.ConsultationCase consultationCase = consultationService
-                .createCase("ARS", "LOSS_REPORT", customerRef, "SYSTEM");
+                .createCase("ARS", "LOSS_REPORT", customerRef, customerName, "SYSTEM");
 
         try {
             // STEP 1: Get Public Key from Bank (Issuer)

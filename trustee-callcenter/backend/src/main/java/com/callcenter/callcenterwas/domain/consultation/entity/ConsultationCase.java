@@ -35,6 +35,9 @@ public class ConsultationCase {
     @Column(nullable = false)
     private String customerRef;
 
+    // 고객 마스킹 이름 (예: 홍*동) - 상담 편의를 위한 최소 식별 정보
+    private String customerName;
+
     // 상담원 ID (ARS인 경우 'SYSTEM')
     private String agentId;
 

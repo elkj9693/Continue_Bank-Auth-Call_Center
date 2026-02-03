@@ -113,7 +113,10 @@ export default function AuditView() {
                                     </div>
                                     <div>
                                         <div style={{ fontSize: '16px', fontWeight: '800', marginBottom: '4px', color: '#333d4b' }}>
-                                            {log.customerRef} <span style={{ fontSize: '12px', color: 'var(--text-dim)', fontWeight: '500' }}>(가명 토큰)</span>
+                                            {log.customerName || '익명 고객'} <span style={{ fontSize: '12px', color: 'var(--text-dim)', fontWeight: '500' }}>({log.channel === 'ARS' ? 'ARS 인증' : '마케팅 대상'})</span>
+                                        </div>
+                                        <div style={{ fontSize: '12px', color: 'var(--text-dim)', fontFamily: 'monospace', marginBottom: '4px' }}>
+                                            ID: {log.customerRef}
                                         </div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', color: 'var(--text-dim)', fontWeight: '600' }}>
                                             <span style={{ color: 'var(--primary)' }}>[{log.channel}]</span>

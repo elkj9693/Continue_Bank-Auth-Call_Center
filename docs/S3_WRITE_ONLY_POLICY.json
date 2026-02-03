@@ -8,12 +8,7 @@
                 "AWS": "arn:aws:iam::015397626545:role/EC2-SSM-Role"
             },
             "Action": "s3:PutObject",
-            "Resource": "arn:aws:s3:::continue-bank-recordings/recordings/*",
-            "Condition": {
-                "StringEquals": {
-                    "s3:x-amz-acl": "bucket-owner-full-control"
-                }
-            }
+            "Resource": "arn:aws:s3:::continue-bank-recordings/recordings/*"
         },
         {
             "Sid": "DenyTrusteeReadAccess",

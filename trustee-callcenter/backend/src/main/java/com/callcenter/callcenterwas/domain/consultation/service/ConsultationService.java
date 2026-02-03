@@ -15,12 +15,14 @@ public class ConsultationService {
     private final ConsultationCaseRepository consultationCaseRepository;
 
     @Transactional
-    public ConsultationCase createCase(String channel, String serviceType, String customerRef, String agentId) {
+    public ConsultationCase createCase(String channel, String serviceType, String customerRef, String customerName,
+            String agentId) {
         ConsultationCase consultationCase = ConsultationCase.builder()
                 .channel(channel)
                 .serviceType(serviceType)
                 .status("OPEN")
                 .customerRef(customerRef)
+                .customerName(customerName != null ? customerName : "익명")
                 .agentId(agentId)
                 .build();
         return consultationCaseRepository.save(consultationCase);

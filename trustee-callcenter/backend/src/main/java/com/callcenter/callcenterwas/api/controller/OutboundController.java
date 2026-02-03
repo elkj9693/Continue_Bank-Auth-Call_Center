@@ -63,6 +63,7 @@ public class OutboundController {
     public Map<String, Object> submitResult(@RequestBody Map<String, Object> request) {
         // leadId를 customerRef로 간주 (데모 시나리오)
         String customerRef = request.get("leadId").toString();
+        String customerName = (String) request.get("customerName"); // [NEW] 이름 수신
         String status = (String) request.get("status");
         String agentId = (String) request.get("agentId");
 
@@ -70,7 +71,7 @@ public class OutboundController {
 
         // 1. 로컬 상담 케이스 생성 (OUTBOUND - MARKETING)
         com.callcenter.callcenterwas.domain.consultation.entity.ConsultationCase consultationCase = consultationService
-                .createCase("OUTBOUND", "MARKETING", customerRef, agentId);
+                .createCase("OUTBOUND", "MARKETING", customerRef, customerName, agentId);
 
         String resultNote;
 
